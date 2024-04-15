@@ -44,4 +44,7 @@
   <ItemGroup>
     <Font Include="MSYHMONO.ttf" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
 </Project>
