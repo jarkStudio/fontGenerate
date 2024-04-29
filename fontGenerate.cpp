@@ -163,20 +163,20 @@ void preview16x16(uint32_t codePoint) {
 
 int main()
 {
-    //save8x16(0x00, 0xFF);
+    //save8x16(0x00, 0x1FF);
 
     //save16x16(0x3000, 0x303f);
     //save16x16(0x3400, 0x9fff);
 
     //save16x16(0x3000, 0x9fff);
 
-    //save16x16(0xFE30, 0xFFFF); //0XFE48 0XFE49 有问题
+    //save16x16(0xFE30, 0xFFFF); //MSYHMONO.ttf  0XFE48 0XFE49 有问题
     //save16x16(0xFF00, 0xFFEF);
 
     //load16x16("font16x16_3400_9fff.bin", 0x3400, stb.utf8Str2Code("思"));
     //load16x16("font16x16_3400_9fff.bin", 0x3400, stb.utf8Str2Code("考"));
-    //load8x16("font8x16_0000_00FF.bin", 0, 'j');
+    load8x16("font8x16_0000_01FF.bin", 0, 'j');
 
-    cout << "Hello!\n";
+    //cout << "Hello!\n";
     return 0;
 }
