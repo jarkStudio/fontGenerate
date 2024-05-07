@@ -27,16 +27,16 @@ stbText stb; //绘制文字
 
 
 // 16 Byte
-uint8_t getPoint8x16(uint8_t* buf, int x, int y) {
+static uint8_t getPoint8x16(uint8_t* buf, int x, int y) {
     return buf[(y < 8 ? 0 : 8) + x] & (1 << (y < 8 ? y : (y - 8)));
 }
 
 // 16 Byte
-void setPoint8x16(uint8_t* buf, int x, int y) {
+static void setPoint8x16(uint8_t* buf, int x, int y) {
     buf[(y < 8 ? 0 : 8) + x] |= (1 << (y < 8 ? y : (y - 8)));
 }
 
-void save8x16(uint32_t begin, uint32_t end) {
+static void save8x16(uint32_t begin, uint32_t end) {
     char path[64];
     snprintf(path, sizeof(path), "font8x16_%04X_%04X.bin", begin, end);
 
@@ -45,34 +45,34 @@ void save8x16(uint32_t begin, uint32_t end) {
         puts("ERROR!!!");
         return;
     }
-    uint8_t tmp[16];
+    uint8_t wordBuf[16];
     for (uint32_t i = begin; i <= end; i++) {
         auto buf = stb.getWordPixel(i);
-        memset(tmp, 0, sizeof(tmp));
+        memset(wordBuf, 0, sizeof(wordBuf));
         for (int y = 0; y < 16; y++) {
             for (int x = 0; x < 8; x++) {
                 if (buf[y * 16 + x])
-                    setPoint8x16(tmp, x, y);
+                    setPoint8x16(wordBuf, x, y);
             }
         }
-        fwrite(tmp, 1, sizeof(tmp), f);
+        fwrite(wordBuf, 1, sizeof(wordBuf), f);
     }
     fclose(f);
     printf("Done: %s", path);
 }
 
-void load8x16(const char* path, uint32_t beginCode, uint32_t codePoint) {
+static void load8x16(const char* path, uint32_t beginCode, uint32_t codePoint) {
     if (codePoint < beginCode)
         return;
 
     auto f = fopen(path, "rb");
     fseek(f, 16 * (codePoint - beginCode), SEEK_SET);
-    uint8_t tmp[16] = {};
-    fread(tmp, 1, sizeof(tmp), f);
+    uint8_t wordBuf[16] = {};
+    fread(wordBuf, 1, sizeof(wordBuf), f);
 
     for (int y = 0; y < 16; y++) {
         for (int x = 0; x < 8; x++) {
-            cout << (getPoint8x16(tmp, x, y) ? "HH" : "--");
+            cout << (getPoint8x16(wordBuf, x, y) ? "HH" : "--");
         }
         cout << '\n';
     }
@@ -81,16 +81,16 @@ void load8x16(const char* path, uint32_t beginCode, uint32_t codePoint) {
 
 
 // 32 Byte
-uint8_t getPoint16x16(uint8_t* buf, int x, int y) {
+static uint8_t getPoint16x16(uint8_t* buf, int x, int y) {
     return buf[(y < 8 ? 0 : 16) + x] & (1 << (y < 8 ? y : (y - 8)));
 }
 
 // 32 Byte
-void setPoint16x16(uint8_t* buf, int x, int y) {
+static void setPoint16x16(uint8_t* buf, int x, int y) {
     buf[(y < 8 ? 0 : 16) + x] |= (1 << (y < 8 ? y : (y - 8)));
 }
 
-void save16x16(uint32_t begin, uint32_t end) {
+static void save16x16(uint32_t begin, uint32_t end) {
     char path[64];
     snprintf(path, sizeof(path), "font16x16_%04X_%04X.bin", begin, end);
 
@@ -99,37 +99,38 @@ void save16x16(uint32_t begin, uint32_t end) {
         puts("ERROR!!!");
         return;
     }
-    uint8_t tmp[32];
+    uint8_t wordBuf[32];
     for (uint32_t i = begin; i <= end; i++) {
         auto buf = stb.getWordPixel((i==0xfe48 || i==0xfe49)? begin :i);
-        memset(tmp, 0, sizeof(tmp));
+        memset(wordBuf, 0, sizeof(wordBuf));
         for (int y = 0; y < 16; y++) {
             for (int x = 0; x < 16; x++) {
                 if(buf[y * 16 + x])
-                    setPoint16x16(tmp, x, y);
+                    setPoint16x16(wordBuf, x, y);
             }
         }
-        fwrite(tmp, 1, sizeof(tmp), f);
+        fwrite(wordBuf, 1, sizeof(wordBuf), f);
     }
     fclose(f);
     printf("Done: %s", path);
 }
 
-void load16x16(const char* path, uint32_t beginCode, uint32_t codePoint) {
+static void load16x16(const char* path, uint32_t beginCode, uint32_t codePoint) {
     if (codePoint < beginCode)
         return;
 
     auto f = fopen(path, "rb");
     fseek(f, 32 * (codePoint - beginCode), SEEK_SET);
-    uint8_t tmp[32] = {};
-    fread(tmp, 1, sizeof(tmp), f);
+    uint8_t wordBuf[32] = {};
+    fread(wordBuf, 1, sizeof(wordBuf), f);
 
     for (int y = 0; y < 16; y++) {
-        for (int x = 0; x < 16; x++) {
-            cout << (getPoint16x16(tmp, x, y)?"HH":"--");
+        for (int x = 0; x < ((codePoint<255)?8:16); x++) {
+            cout << (getPoint16x16(wordBuf, x, y)?"HH":"--");
         }
         cout << '\n';
     }
+
     cout << '\n';
 }
 
@@ -137,7 +138,7 @@ void load16x16(const char* path, uint32_t beginCode, uint32_t codePoint) {
 
 
 
-void preview8x16(uint32_t codePoint) {
+static void preview8x16(uint32_t codePoint) {
     auto buf = stb.getWordPixel(codePoint);
     for (int y = 0; y < 16; y++) {
         for (int x = 0; x < 8; x++) {
@@ -148,7 +149,7 @@ void preview8x16(uint32_t codePoint) {
     std::cout << '\n';
 }
 
-void preview16x16(uint32_t codePoint) {
+static void preview16x16(uint32_t codePoint) {
     //auto buf = stb.getWordPixel("金。，￥是？、，");
     auto buf = stb.getWordPixel(codePoint);
 
@@ -161,7 +162,8 @@ void preview16x16(uint32_t codePoint) {
     std::cout << '\n';
 }
 
-int main()
+
+static int mainStb()
 {
     //save8x16(0x00, 0x1FF);
 
@@ -175,8 +177,110 @@ int main()
 
     //load16x16("font16x16_3400_9fff.bin", 0x3400, stb.utf8Str2Code("思"));
     //load16x16("font16x16_3400_9fff.bin", 0x3400, stb.utf8Str2Code("考"));
-    load8x16("font8x16_0000_01FF.bin", 0, 'j');
+    //load8x16("font8x16_0000_01FF.bin", 0, 'j');
+    load16x16("font16x16UniFont_0000_FFFF.bin", 0, 0X6522);
 
     //cout << "Hello!\n";
+    return 0;
+}
+
+
+/*
+
+// 所有字符均以16x16保存，显示时则按需是否显示右侧空白区域 x:8~16
+void save16x16UniFont(cv::Mat& img, uint32_t begin, uint32_t end) {
+    char path[64];
+    snprintf(path, sizeof(path), "font16x16UniFont_%04X_%04X.bin", begin, end);
+
+    auto f = fopen(path, "wb");
+    if (!f) {
+        puts("ERROR!!!");
+        return;
+    }
+    uint8_t wordBuf[32];
+    for (uint32_t i = begin; i <= end; i++) {
+        int x0 = (i & 0xff) * 16;
+        int y0 = (i >> 8) * 16;
+        memset(wordBuf, 0, sizeof(wordBuf));
+        if (img.channels() == 3) {
+            for (int y = 0; y < 16; y++) {
+                for (int x = 0; x < 16; x++) {
+                    if (img.at<cv::Vec3b>(y0 + y, x0 + x)[1] == 0)
+                        setPoint16x16(wordBuf, x, y);
+                }
+            }
+        }
+        else if (img.channels() == 4) {
+            for (int y = 0; y < 16; y++) {
+                for (int x = 0; x < 16; x++) {
+                    if (img.at<cv::Vec4b>(y0 + y, x0 + x)[1] == 0)
+                        setPoint16x16(wordBuf, x, y);
+                }
+            }
+        }
+        else if (img.channels() == 1) {
+            for (int y = 0; y < 16; y++) {
+                for (int x = 0; x < 16; x++) {
+                    if (img.at<uchar>(y0 + y, x0 + x) == 0)
+                        setPoint16x16(wordBuf, x, y);
+                }
+            }
+        }
+        else {
+            cout << "Error: img.channel:" << img.channels() << endl;
+        }
+        fwrite(wordBuf, 1, sizeof(wordBuf), f);
+    }
+    fclose(f);
+    printf("Done: %s", path);
+}
+
+
+void preview16x16UniFont(cv::Mat& img, uint32_t codePoint) {
+    int x0 = (codePoint & 0xff) * 16;
+    int y0 = (codePoint >> 8) * 16;
+
+    if (img.channels() == 3) {
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 16; x++) {
+                std::cout << ((img.at<cv::Vec3b>(y0 + y, x0 + x)[1] == 0) ? "@@" : "  ");
+            }
+            std::cout << '\n';
+        }
+    }
+    else if (img.channels() == 4) {
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 16; x++) {
+                std::cout << ((img.at<cv::Vec4b>(y0 + y, x0 + x)[1] == 0) ? "@@" : "  ");
+            }
+            std::cout << '\n';
+        }
+    }
+    else if (img.channels() == 1) {
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 16; x++) {
+                std::cout << ((img.at<uchar>(y0 + y, x0 + x) == 0) ? "@@" : "  ");
+            }
+            std::cout << '\n';
+        }
+    }
+    else {
+        cout << "Error: img.channel:" << img.channels() << endl;
+    }
+    std::cout << '\n';
+}
+
+
+void mainUniFont() {
+    auto img = cv::imread("unifont15.png"); // 24Bit
+    //preview16x16UniFont(img, 'a');
+    save16x16UniFont(img, 0, 0xffff);
+}
+*/
+
+int main() {
+    mainStb();
+    //mainUniFont();
+
     return 0;
 }
