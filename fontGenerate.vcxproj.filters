@@ -18,6 +18,9 @@
     <ClCompile Include="fontGenerate.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="GBK_TAB.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_truetype.h">
@@ -33,6 +36,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GBK_TAB.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
