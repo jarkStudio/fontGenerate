@@ -280,6 +280,8 @@ void mainUniFont() {
 }
 */
 
+
+
 // GBK 采用双 字节表示
 // 总体编码范围为 8140-FEFE
 // 首字节在 81-FE 之间
@@ -287,7 +289,7 @@ void mainUniFont() {
 
 // 输出全部GBK字符到文本
 static void generateGBK() {
-    auto f = fopen("GBK.txt", "wb");
+    auto f = fopen("GBK_ALL_CHAR.txt", "wb");
     if (!f) return;
 
     for (uint8_t i = 0x81; i <= 0xfe; i++) {
@@ -317,14 +319,17 @@ static void generateGBK() {
 }
 
 
-// 建立GBK到Unicode转换表，CP936.TXT 转换表下载 http://www.gnu.org/directory/libiconv.html
+// 建立GBK到Unicode转换表
+// CP936.TXT 转换表下载
+// http://www.gnu.org/directory/libiconv.html
+// https://directory.fsf.org/wiki/Libiconv
 static void generateGBK2UnicodeTab() {
     //47880 Bytes 47KB 栈内
     //const int highBytes = 0xfe - 0x81 + 1; // 126
     //const int lowBytes = 0xfe - 0x40 + 1;  // 191
     uint16_t tab[126][192]={ 0 }; // 191+1 为了内存对齐
 
-    std::ifstream file("CP936_GBK2UNICODE.TXT"); // 打开文件
+    std::ifstream file("CP936_UNICODE.TXT"); // 打开文件
     std::string line;
     std::vector<std::pair<int, int>> hex_pairs; // 存储解析后的十六进制数字对
 
@@ -431,11 +436,47 @@ static void mainGBK() {
     preview16x16GBK("font16x16GBK_8140_FEFE.bin", { 0xb3c2, 0xcbbc, 0xbddc });
 }
 
+
+/*
+GB18030-2022 双字节和四字节到Unicode基本平面需要查表
+四字节范围: 0x81308130 - 0x8431A439 查表转为Unicode基本平面
+四字节范围: 0x90308130 - 0xE3329A35 公式转换到Unicode扩展平面 10000 - 10FFFF
+*/
+
+// GB18030转换到Unicode扩展平面
+static uint32_t GB18030toUnicodeExt(uint32_t codePoint) {
+    return ((codePoint >> 24) - 144) * 12600 +
+        (((codePoint >> 16) & 0xFF) - 48) * 1260 +
+        (((codePoint >> 8) & 0xFF) - 129) * 10 +
+        (codePoint & 0xFF) - 48 + 65536;
+}
+
+// Unicode扩展平面转换到GB18030
+static uint32_t unicodeExtToGB18030(uint32_t codePoint) {
+    uint32_t m1 = (codePoint - 65536) / 12600;
+    uint32_t n1 = (codePoint - 65536) % 12600;
+    uint32_t m2 = n1 / 1260;
+    uint32_t n2 = n1 % 1260;
+    uint32_t m3 = n2 / 10;
+    uint32_t n3 = n2 % 10;
+    return ((m1 + 144) << 24) +
+        ((m2 + 48) << 16) +
+        ((m3 + 129) << 8) +
+        n3 + 48;
+}
+
+
+
+
 int main() {
     //mainStb();
     //mainUniFont();
-    mainGBK();
+    //mainGBK();
 
+    cout << std::format("0x{:x} -> 0x{:x}\n", 0x90308130, GB18030toUnicodeExt(0x90308130));
+    cout << std::format("0x{:x} -> 0x{:x}\n", 0xE3329A35, GB18030toUnicodeExt(0xE3329A35));
+    cout << std::format("0x{:x} -> 0x{:x}\n", 0x10000, unicodeExtToGB18030(0x10000));
+    cout << std::format("0x{:x} -> 0x{:x}\n", 0x10FFFF, unicodeExtToGB18030(0x10FFFF));
 
     return 0;
 }
