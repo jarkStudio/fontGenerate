@@ -429,11 +429,66 @@ static void preview16x16GBK(const char* path, const vector<uint16_t>& codePoints
     fclose(f);
 }
 
+
+// static void generateGBKpic(const char* path, cv::Mat& img) {
+//     const int bytes = 774144;
+//     uint8_t* fontBuf = new uint8_t[bytes];
+
+//     auto f = fopen(path, "rb");
+//     fread(fontBuf, 1, bytes, f);
+//     fclose(f);
+
+//     for (int i = 0; i <= (0xfe - 0x81); i++) {
+//         for (int j = 0; j <= (0xfe - 0x40); j++) {
+//             auto wordBuf = fontBuf + (i * 192 + j) * 32;
+//             int x0 = j * 16;
+//             int y0 = i * 16;
+//             for (int y = 0; y < 16; y++) {
+//                 for (int x = 0; x < 16; x++) {
+//                     auto& px = img.at<cv::Vec3b>(y0 + y, x0 + x);
+//                     if (j == 0x7f - 0x40) {
+//                         px = cv::Vec3b(100, 100, 100);
+//                     }
+//                     else if (getPoint16x16(wordBuf, x, y)) {
+//                         px = cv::Vec3b(0, 0, 0);
+//                     }
+//                     else if (i <= 0xa0 - 0x81) {
+//                         px = cv::Vec3b(204, 255, 204);
+//                     }
+//                     else if (0xa8 - 0x81 <= i && i <= 0xa9 - 0x81 && j <= 0xa0 - 0x40) {
+//                         px = cv::Vec3b(255, 204, 255);
+//                     }
+//                     else if (i <= 0xa9 - 0x81 && j >= 0xa1 - 0x40) {
+//                         px = cv::Vec3b(255, 255, 204);
+//                     }
+//                     else if (i >= 0xaa - 0x81 && j <= 0xa0 - 0x40) {
+//                         px = cv::Vec3b(204, 255, 255);
+//                     }
+//                     else if (0xb0 - 0x81 <= i && i <= 0xf7 - 0x81) {
+//                         px = cv::Vec3b(0, 255, 204);
+//                     }
+//                     else {
+//                         px = cv::Vec3b(255, 255, 255);
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
 static void mainGBK() {
     //generateGBK();
     //generateGBK2UnicodeTab();
     //load16x16toGBKBuffer();
     preview16x16GBK("font16x16GBK_8140_FEFE.bin", { 0xb3c2, 0xcbbc, 0xbddc });
+
+    // int b1start = 0x81;
+    // int b2start = 0x40;
+    // int bEnd = 0XFE;
+    // cv::Mat img = cv::Mat((bEnd - b1start + 1) * 16, (bEnd-b2start+1)* 16, CV_8UC3);
+    // generateGBKpic("D:\\project\\github\\fontGenerate\\font16x16GBK_8140_FEFE.bin", img);
+    // cv::imwrite("GBK_" + std::to_string(time(nullptr)) + ".png", img);
 }
 
 
