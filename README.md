@@ -1,5 +1,6 @@
 # fontGenerate
-生成字模字库
+生成GBK和Unicode字模字库
+
 
 https://github.com/multitheftauto/unifont
 
